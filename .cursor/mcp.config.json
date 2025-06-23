@@ -1,0 +1,59 @@
+{
+  "projectName": "Quantum Climb Core",
+  "description": "Tenant-based SaaS system with Supabase and GitHub integration, auto-deploy to Vercel",
+  "github": {
+    "repo": "QuantumClimb/QuantumHealth",
+    "branch": "main",
+    "autoPush": true
+  },
+  "vercel": {
+    "project": "quantum-climb-core",
+    "team": "quantum-climb",
+    "autoDeploy": true,
+    "deploymentMethod": "github-actions",
+    "env": {
+      "VITE_SUPABASE_URL": "@supabase-url",
+      "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key",
+      "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
+      "SUPABASE_JWT_SECRET": "@supabase-jwt-secret"
+    }
+  },
+  "supabase": {
+    "projectRef": "fihfnzxcsmzhprwakhhr",
+    "schema": "public",
+    "multiTenant": true,
+    "migrations": "./supabase/migrations",
+    "types": "./supabase/types.ts"
+  },
+  "cursor": {
+    "enableWorkspaceSync": true,
+    "sync": ["github", "supabase"]
+  },
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "$SUPABASE_ACCESS_TOKEN"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github",
+        "--access-token",
+        "$GITHUB_ACCESS_TOKEN"
+      ]
+    }
+  },
+  "automation": {
+    "deployment": {
+      "method": "github-actions",
+      "triggers": ["push to main", "migration updates"],
+      "env_sync": "automatic via github secrets"
+    }
+  }
+} 

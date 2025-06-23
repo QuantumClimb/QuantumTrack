@@ -1,0 +1,144 @@
+name: Deploy to Vercel with Environment Setup
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔧 Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: 🔗 Link or Create Vercel Project
+        run: |
+          echo "Setting up Vercel project..."
+          
+          # Try to link existing project first
+          if vercel link --yes --token=${{ secrets.VERCEL_TOKEN }} 2>/dev/null; then
+            echo "✅ Linked to existing project"
+          else
+            echo "🆕 Creating new project..."
+            # Create project automatically with repo name (lowercase)
+            PROJECT_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')
+            vercel --name="$PROJECT_NAME" --yes --token=${{ secrets.VERCEL_TOKEN }}
+            echo "✅ Created new project: $PROJECT_NAME"
+          fi
+
+      - name: 🌍 Set Environment Variables in Vercel
+        run: |
+          echo "Setting up Vercel environment variables..."
+          
+          # Set public environment variables (accessible in frontend)
+          vercel env add VITE_SUPABASE_URL production --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.VITE_SUPABASE_URL }}"
+          vercel env add VITE_SUPABASE_ANON_KEY production --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.VITE_SUPABASE_ANON_KEY }}"
+          
+          # Set private environment variables (server-side only)
+          vercel env add SUPABASE_SERVICE_ROLE_KEY production --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+          vercel env add SUPABASE_JWT_SECRET production --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.SUPABASE_JWT_SECRET }}"
+          
+          # Set preview environment variables (for PR deployments)
+          vercel env add VITE_SUPABASE_URL preview --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.VITE_SUPABASE_URL }}"
+          vercel env add VITE_SUPABASE_ANON_KEY preview --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.VITE_SUPABASE_ANON_KEY }}"
+          vercel env add SUPABASE_SERVICE_ROLE_KEY preview --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+          vercel env add SUPABASE_JWT_SECRET preview --token=${{ secrets.VERCEL_TOKEN }} --force <<< "${{ secrets.SUPABASE_JWT_SECRET }}"
+          
+          echo "✅ Environment variables configured in Vercel"
+
+      - name: 🏗️ Build Project
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: 🚀 Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "🎉 Production deployment complete!"
+
+      - name: 🔍 Deploy to Vercel (Preview)
+        if: github.event_name == 'pull_request'
+        run: |
+          vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+          echo "👀 Preview deployment complete!"
+
+      - name: 🗄️ Run Database Migrations (Production only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Install Supabase CLI
+          npm install -g @supabase/cli
+          
+          # Run migrations if they exist
+          if [ -d "supabase/migrations" ]; then
+            echo "🔄 Running database migrations..."
+            supabase migration up --db-url ${{ secrets.SUPABASE_URL }}
+            echo "✅ Migrations completed"
+          else
+            echo "ℹ️ No migrations directory found, skipping"
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: 📊 Health Check
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "🔍 Performing deployment health check..."
+          # Wait for deployment to be ready
+          sleep 30
+          
+          # Get the deployment URL from Vercel
+          DEPLOYMENT_URL=$(vercel ls --token=${{ secrets.VERCEL_TOKEN }} | grep "https://" | head -1 | awk '{print $2}')
+          
+          if [ -n "$DEPLOYMENT_URL" ]; then
+            echo "Testing deployment at: $DEPLOYMENT_URL"
+            curl -f "$DEPLOYMENT_URL" || exit 1
+            echo "✅ Health check passed!"
+          else
+            echo "⚠️ Could not determine deployment URL, skipping health check"
+          fi
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 📧 Notify Deployment Status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ needs.deploy.result }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+            const title = `${emoji} Deployment ${status.toUpperCase()}`;
+            
+            const body = status === 'success' 
+              ? '🚀 QuantumHealth has been successfully deployed to Vercel!\n\n🔗 **Check your Vercel dashboard for the live URL**'
+              : '❌ Deployment failed. Please check the logs for details.';
+            
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `### ${title}\n\n${body}`
+            }); 
