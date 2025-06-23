@@ -1,26 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, FileText, MessageSquare, ChevronRight, Phone, MessageCircle, Clipboard } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-const upcomingAppointment = {
-  id: 'apt-123',
-  doctor: 'Dr. Maria Rodriguez',
-  specialty: 'Dentistry',
-  date: 'April 15, 2025',
-  time: '10:00 AM',
-  status: 'confirmed',
-  clinicPhone: '+14155552671',
-  notes: 'Regular dental checkup and cleaning'
-};
-
-const recentReports = [
-  { id: 'rep-1', name: 'Dental X-Ray Results', date: 'March 28, 2025', type: 'Dentistry', doctor: 'Dr. Maria Rodriguez' },
-  { id: 'rep-2', name: 'Blood Test Results', date: 'March 15, 2025', type: 'Lab Work', doctor: 'Dr. James Wilson' }
-];
+import { multiTenantService, type Appointment, type MedicalReport, type DoctorProfile, type PatientProfile } from '@/services/supabaseService';
+import { toast } from 'sonner';
 
 const createWhatsAppUrl = (phone: string, appointmentInfo: any) => {
   const message = encodeURIComponent(
@@ -30,11 +16,119 @@ const createWhatsAppUrl = (phone: string, appointmentInfo: any) => {
 };
 
 const PatientDashboard = () => {
+  const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
+  const [recentReports, setRecentReports] = useState<MedicalReport[]>([]);
+  const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
+  const [patients, setPatients] = useState<PatientProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load all data in parallel
+      const [appointmentsData, reportsData, doctorsData, patientsData] = await Promise.all([
+        multiTenantService.getAppointments(),
+        multiTenantService.getMedicalReports(),
+        multiTenantService.getDoctors(),
+        multiTenantService.getPatients()
+      ]);
+
+      // Filter upcoming appointments (scheduled status and future dates)
+      const upcoming = appointmentsData.filter(apt => {
+        const appointmentDate = new Date(apt.appointment_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return apt.status === 'scheduled' && appointmentDate >= today;
+      }).sort((a, b) => new Date(a.appointment_date).getTime() - new Date(b.appointment_date).getTime());
+
+      // Get recent reports (last 5)
+      const recent = reportsData
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5);
+
+      setUpcomingAppointments(upcoming);
+      setRecentReports(recent);
+      setDoctors(doctorsData);
+      setPatients(patientsData);
+
+      console.log('📊 Dashboard data loaded:', {
+        appointments: upcoming.length,
+        reports: recent.length,
+        doctors: doctorsData.length,
+        patients: patientsData.length
+      });
+
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      toast.error('Failed to load dashboard data. Please refresh the page.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDoctorName = (doctorId: string) => {
+    const doctor = doctors.find(d => d.id === doctorId);
+    return doctor ? `Dr. ${doctor.first_name} ${doctor.last_name}` : 'Unknown Doctor';
+  };
+
+  const getPatientName = (patientId: string) => {
+    const patient = patients.find(p => p.id === patientId);
+    return patient ? `${patient.first_name} ${patient.last_name}` : 'Unknown Patient';
+  };
+
+  const formatAppointmentDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatReportDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Get the next upcoming appointment
+  const nextAppointment = upcomingAppointments[0];
+
+  // Fallback WhatsApp number (in production, this would come from clinic settings)
+  const clinicWhatsApp = '+14155552671';
+
+  if (loading) {
+    return (
+      <Layout userRole="patient">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-healthy-600 mx-auto mb-4"></div>
+              <h2 className="text-xl font-semibold text-healthy-800">Loading Dashboard</h2>
+              <p className="text-healthy-600">Getting your latest information...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Get current patient name (first patient for now)
+  const currentPatient = patients[0];
+  const patientName = currentPatient ? currentPatient.first_name : 'Patient';
+
   return (
     <Layout userRole="patient">
       <div className="max-w-7xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Welcome back, Sarah</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Welcome back, {patientName}</h1>
           <p className="text-gray-500">Here's what you need to know today</p>
         </header>
 
@@ -47,32 +141,44 @@ const PatientDashboard = () => {
                 Upcoming Appointment
               </CardTitle>
             </CardHeader>
-            {upcomingAppointment ? (
+            {nextAppointment ? (
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-medium">{upcomingAppointment.doctor}</h3>
-                      <p className="text-sm text-gray-500">{upcomingAppointment.specialty}</p>
+                      <h3 className="font-medium">{getDoctorName(nextAppointment.doctor_id)}</h3>
+                      <p className="text-sm text-gray-500">{nextAppointment.appointment_type || 'Consultation'}</p>
                     </div>
                     <Badge variant="outline" className="border-healthy-200 text-healthy-700 bg-healthy-50">
-                      {upcomingAppointment.status}
+                      {nextAppointment.status}
                     </Badge>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <div className="flex flex-col">
                       <span className="text-gray-500">Date</span>
-                      <span className="font-medium">{upcomingAppointment.date}</span>
+                      <span className="font-medium">{formatAppointmentDate(nextAppointment.appointment_date)}</span>
                     </div>
                     <div className="flex flex-col text-right">
                       <span className="text-gray-500">Time</span>
-                      <span className="font-medium">{upcomingAppointment.time}</span>
+                      <span className="font-medium">{nextAppointment.appointment_time}</span>
                     </div>
                   </div>
                   
+                  {nextAppointment.notes && (
+                    <div className="text-sm">
+                      <span className="text-gray-500">Notes: </span>
+                      <span className="text-gray-700">{nextAppointment.notes}</span>
+                    </div>
+                  )}
+                  
                   <div className="pt-2">
                     <a 
-                      href={createWhatsAppUrl(upcomingAppointment.clinicPhone, upcomingAppointment)}
+                      href={createWhatsAppUrl(clinicWhatsApp, {
+                        doctor: getDoctorName(nextAppointment.doctor_id),
+                        date: formatAppointmentDate(nextAppointment.appointment_date),
+                        time: nextAppointment.appointment_time,
+                        specialty: nextAppointment.appointment_type
+                      })}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="w-full inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors"
@@ -85,7 +191,15 @@ const PatientDashboard = () => {
               </CardContent>
             ) : (
               <CardContent>
-                <p className="text-gray-500">No upcoming appointments</p>
+                <div className="text-center py-8">
+                  <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 mb-4">No upcoming appointments</p>
+                  <Button asChild size="sm">
+                    <Link to="/patient/appointments/book">
+                      Schedule your first appointment
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             )}
             <CardFooter className="border-t border-gray-100 bg-gray-50/50">
@@ -105,19 +219,37 @@ const PatientDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {recentReports.map(report => (
-                  <div key={report.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
-                    <div>
-                      <h4 className="font-medium text-sm">{report.name}</h4>
-                      <p className="text-xs text-gray-500">{report.date}</p>
+              {recentReports.length > 0 ? (
+                <div className="space-y-3">
+                  {recentReports.map(report => (
+                    <div key={report.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
+                      <div>
+                        <h4 className="font-medium text-sm">{report.report_name}</h4>
+                        <p className="text-xs text-gray-500">{formatReportDate(report.created_at)}</p>
+                        {report.doctor_id && (
+                          <p className="text-xs text-gray-400">{getDoctorName(report.doctor_id)}</p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline" className="text-xs border-gray-200">
+                          {report.report_type}
+                        </Badge>
+                        <p className="text-xs text-gray-400 mt-1">{report.status}</p>
+                      </div>
                     </div>
-                    <Badge variant="outline" className="text-xs border-gray-200">
-                      {report.type}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 mb-4">No reports yet</p>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/patient/reports/upload">
+                      Upload your first report
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
             <CardFooter className="border-t border-gray-100 bg-gray-50/50">
               <Link to="/patient/reports" className="text-sm text-healthy-600 hover:text-healthy-700 font-medium flex items-center w-full justify-between">
@@ -142,7 +274,7 @@ const PatientDashboard = () => {
                   </Link>
                 </Button>
                 <Button variant="outline" className="justify-start">
-                  <a href={`https://wa.me/${upcomingAppointment.clinicPhone}`} target="_blank" rel="noopener noreferrer" className="flex items-center w-full">
+                  <a href={`https://wa.me/${clinicWhatsApp}`} target="_blank" rel="noopener noreferrer" className="flex items-center w-full">
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Chat with clinic
                   </a>
@@ -207,7 +339,7 @@ const PatientDashboard = () => {
                 </svg>
               </div>
               <h3 className="text-lg font-medium mb-2">Lab Work</h3>
-              <p className="text-gray-500 text-sm mb-3">Comprehensive testing services</p>
+              <p className="text-gray-500 text-sm mb-3">Comprehensive lab testing</p>
               <Link to="/patient/appointments/book?specialty=lab-work" className="text-sm text-healthy-600 hover:text-healthy-700 font-medium">
                 Book appointment →
               </Link>
@@ -220,3 +352,4 @@ const PatientDashboard = () => {
 };
 
 export default PatientDashboard;
+

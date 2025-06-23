@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
@@ -11,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { multiTenantService, type DoctorProfile, type PatientProfile } from '@/services/supabaseService';
 
 const specialties = [
   { id: 'dentistry', name: 'Dentistry', icon: '🦷', color: 'border-healthy-400' },
@@ -18,25 +18,6 @@ const specialties = [
   { id: 'cancer-screening', name: 'Cancer Screening', icon: '🔬', color: 'border-amber-400' },
   { id: 'lab-work', name: 'Lab Work', icon: '🧪', color: 'border-purple-400' }
 ];
-
-const doctors = {
-  'dentistry': [
-    { id: 'dr-1', name: 'Dr. Maria Rodriguez' },
-    { id: 'dr-2', name: 'Dr. James Smith' }
-  ],
-  'orthopaedics': [
-    { id: 'dr-3', name: 'Dr. Robert Johnson' },
-    { id: 'dr-4', name: 'Dr. Sarah Williams' }
-  ],
-  'cancer-screening': [
-    { id: 'dr-5', name: 'Dr. Emily Davis' },
-    { id: 'dr-6', name: 'Dr. Michael Brown' }
-  ],
-  'lab-work': [
-    { id: 'dr-7', name: 'Dr. Jennifer Wilson' },
-    { id: 'dr-8', name: 'Dr. David Jones' }
-  ]
-};
 
 const timeSlots = [
   '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
@@ -54,16 +35,102 @@ const AppointmentBooking = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const handleNextStep = () => {
+  // Real data from database
+  const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
+  const [patients, setPatients] = useState<PatientProfile[]>([]);
+  const [loadingDoctors, setLoadingDoctors] = useState(false);
+
+  // Load doctors when specialty changes
+  useEffect(() => {
+    if (specialty) {
+      loadDoctorsForSpecialty(specialty);
+    }
+  }, [specialty]);
+
+  // Load patients on component mount (for getting patient ID)
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  const loadDoctorsForSpecialty = async (specialtyName: string) => {
+    setLoadingDoctors(true);
+    try {
+      const allDoctors = await multiTenantService.getDoctors();
+      // Filter doctors by specialization (case-insensitive match)
+      const filteredDoctors = allDoctors.filter(doc => 
+        doc.specialization.toLowerCase().includes(specialtyName.toLowerCase()) ||
+        specialtyName.toLowerCase().includes(doc.specialization.toLowerCase())
+      );
+      setDoctors(filteredDoctors);
+    } catch (error) {
+      console.error('Error loading doctors:', error);
+      toast.error('Failed to load doctors. Please try again.');
+    } finally {
+      setLoadingDoctors(false);
+    }
+  };
+
+  const loadPatients = async () => {
+    try {
+      const patientList = await multiTenantService.getPatients();
+      setPatients(patientList);
+    } catch (error) {
+      console.error('Error loading patients:', error);
+    }
+  };
+
+  const handleNextStep = async () => {
     if (step === 1 && specialty) {
       setStep(2);
     } else if (step === 2 && doctor && date) {
       setStep(3);
     } else if (step === 3 && time) {
-      // In a real app, this would submit the appointment to an API
-      toast.success('Appointment booked successfully!');
-      navigate('/patient/dashboard');
+      await bookAppointment();
+    }
+  };
+  
+  const bookAppointment = async () => {
+    setIsLoading(true);
+    try {
+      // Get the first patient (in a real app, this would be the current logged-in patient)
+      const currentPatient = patients[0];
+      if (!currentPatient) {
+        toast.error('No patient profile found. Please create a patient profile first.');
+        return;
+      }
+
+      // Format the date and time
+      const appointmentDate = date!.toISOString().split('T')[0]; // YYYY-MM-DD
+      const appointmentTime = time;
+
+      // Create appointment in database
+      const appointment = await multiTenantService.createAppointment({
+        patient_id: currentPatient.id,
+        doctor_id: doctor,
+        appointment_date: appointmentDate,
+        appointment_time: appointmentTime,
+        duration_minutes: 30,
+        status: 'scheduled',
+        appointment_type: 'consultation',
+        notes: `${specialty} consultation`,
+        consultation_fee: 100,
+        payment_status: 'pending'
+      });
+
+      if (appointment) {
+        toast.success('✅ Appointment booked successfully and saved to database!');
+        console.log('🎉 Appointment created:', appointment);
+        navigate('/patient/dashboard');
+      } else {
+        toast.error('Failed to create appointment. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error booking appointment:', error);
+      toast.error('Failed to book appointment. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -72,6 +139,8 @@ const AppointmentBooking = () => {
       setStep(step - 1);
     }
   };
+
+  const selectedDoctor = doctors.find(d => d.id === doctor);
   
   return (
     <Layout userRole="patient">
@@ -148,16 +217,47 @@ const AppointmentBooking = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium mb-1 block">Select Doctor</label>
-                    <Select value={doctor} onValueChange={setDoctor}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a doctor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {specialty && doctors[specialty as keyof typeof doctors].map(doc => (
-                          <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {loadingDoctors ? (
+                      <div className="p-3 border rounded-md text-center text-gray-500">
+                        Loading doctors...
+                      </div>
+                    ) : doctors.length > 0 ? (
+                      <Select value={doctor} onValueChange={setDoctor}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a doctor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {doctors.map(doc => (
+                            <SelectItem key={doc.id} value={doc.id}>
+                              {doc.first_name} {doc.last_name} - {doc.specialization}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="p-3 border rounded-md text-center text-amber-600 bg-amber-50">
+                        No doctors available for {specialty}. Please try another specialty.
+                      </div>
+                    )}
+                    
+                    {selectedDoctor && (
+                      <div className="mt-2 p-3 bg-healthy-50 rounded-md">
+                        <h4 className="font-medium text-healthy-800">
+                          Dr. {selectedDoctor.first_name} {selectedDoctor.last_name}
+                        </h4>
+                        <p className="text-sm text-healthy-600">{selectedDoctor.specialization}</p>
+                        {selectedDoctor.experience_years && (
+                          <p className="text-sm text-healthy-600">
+                            {selectedDoctor.experience_years} years experience
+                          </p>
+                        )}
+                        {selectedDoctor.consultation_fee && (
+                          <p className="text-sm text-healthy-600">
+                            Consultation fee: ${selectedDoctor.consultation_fee}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -207,6 +307,14 @@ const AppointmentBooking = () => {
             {step === 3 && (
               <div>
                 <h3 className="font-medium mb-4">Available time slots for {date && format(date, "PPP")}</h3>
+                {selectedDoctor && (
+                  <div className="mb-4 p-3 bg-blue-50 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      <strong>Booking with:</strong> Dr. {selectedDoctor.first_name} {selectedDoctor.last_name}
+                    </p>
+                    <p className="text-sm text-blue-600">{selectedDoctor.specialization}</p>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {timeSlots.map(slot => (
                     <button
@@ -239,11 +347,17 @@ const AppointmentBooking = () => {
               disabled={
                 (step === 1 && !specialty) ||
                 (step === 2 && (!doctor || !date)) ||
-                (step === 3 && !time)
+                (step === 3 && !time) ||
+                isLoading
               }
               className="bg-gradient-to-r from-healthy-400 to-nature-500 hover:from-healthy-500 hover:to-nature-600"
             >
-              {step < 3 ? 'Continue' : 'Book Appointment'}
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Booking...
+                </>
+              ) : step < 3 ? 'Continue' : 'Book Appointment'}
             </Button>
           </CardFooter>
         </Card>
