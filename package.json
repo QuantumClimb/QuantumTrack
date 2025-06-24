@@ -5,11 +5,15 @@
   "type": "module",
   "description": "Advanced credit line management system for building stores",
   "keywords": ["credit-management", "customer-tracking", "business-management", "react", "typescript"],
-  "author": "QuantumClimb",
+  "author": {
+    "name": "QuantumClimb",
+    "email": "qc@quantum-climb.com",
+    "url": "https://github.com/QuantumClimb"
+  },
   "homepage": "https://quantumtrack.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/QuantumClimb/quantumtrack"
+    "url": "https://github.com/QuantumClimb/QuantumTrack"
   },
   "scripts": {
     "dev": "vite",
