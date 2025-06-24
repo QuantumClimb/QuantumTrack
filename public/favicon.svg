@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="16" fill="#14B8A6"/>
+  
+  <!-- Credit card icon -->
+  <path d="M24 10H8C6.89543 10 6 10.8954 6 12V20C6 21.1046 6.89543 22 8 22H24C25.1046 22 26 21.1046 26 20V12C26 10.8954 25.1046 10 24 10Z" fill="white"/>
+  <rect x="8" y="14" width="16" height="2" rx="1" fill="#14B8A6"/>
+  <rect x="8" y="17" width="8" height="2" rx="1" fill="#14B8A6"/>
+</svg> 

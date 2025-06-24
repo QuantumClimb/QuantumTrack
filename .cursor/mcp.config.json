@@ -2,7 +2,7 @@
   "projectName": "Quantum Climb Core",
   "description": "Tenant-based SaaS system with Supabase and GitHub integration, auto-deploy to Vercel",
   "github": {
-    "repo": "QuantumClimb/QuantumHealth",
+    "repo": "QuantumClimb/QuantumTrack",
     "branch": "main",
     "autoPush": true
   },

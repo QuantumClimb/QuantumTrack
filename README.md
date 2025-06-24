@@ -1,115 +1,182 @@
-# QuantumHealth - Healthcare Management System
+# QuantumTrack
 
-A modern, comprehensive healthcare management platform built with React and TypeScript.
+**Advanced Credit Line Management System**
 
-## About QuantumHealth
+A professional, mobile-first React web application designed for building stores to efficiently manage customer credit accounts. QuantumTrack empowers store owners to track customer balances, record transactions, send automated payment reminders via WhatsApp, and generate comprehensive reports.
 
-QuantumHealth is your trusted healthcare companion designed to bridge the gap between patients and healthcare providers. Our platform provides secure messaging, report management, appointment booking, and comprehensive health tracking tools.
+## 🚀 Features
 
-### Key Features
+### Core Functionality
+- **Customer Management**: Comprehensive customer database with credit tracking
+- **Smart Apartment System**: Intelligent 5-digit apartment parsing (Tower/Floor/Unit)
+- **Transaction Recording**: Seamless purchase and payment logging
+- **WhatsApp Integration**: Automated payment reminders via Twilio
+- **Real-time Dashboard**: Live overview of all customer accounts
+- **Transaction History**: Complete audit trail for all customer interactions
+- **Responsive Design**: Optimized for mobile and desktop usage
 
-- **Dual Role System**: Separate interfaces for doctors and patients
-- **Secure Messaging**: HIPAA-compliant communication between patients and healthcare providers
-- **Report Management**: Upload, view, and manage medical reports with thumbnail previews
-- **Appointment Booking**: Streamlined scheduling system for patient-doctor appointments
-- **Dashboard Analytics**: Comprehensive health metrics and insights
-- **Modern UI**: Built with shadcn-ui components for a professional, accessible experience
+### Advanced Features
+- **Multi-tenant Architecture**: Support for multiple store locations
+- **CSV Export**: Export customer and transaction data
+- **Advanced Reporting**: Detailed analytics and insights
+- **Theme Support**: Light and dark mode compatibility
+- **Offline Capability**: Progressive Web App features
 
-## Technology Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: React 18 with TypeScript
-- **Build Tool**: Vite (fast development and production builds)
-- **UI Framework**: shadcn-ui components with Radix UI primitives
-- **Styling**: Tailwind CSS with custom design system
-- **Routing**: React Router v6
-- **State Management**: React Query for server state
-- **Form Handling**: React Hook Form with Zod validation
-- **Charts & Visualization**: Recharts for health analytics
+**Frontend:**
+- React 18 + TypeScript
+- Vite (Build Tool)
+- Tailwind CSS + shadcn/ui Components
+- TanStack React Query (State Management)
+- React Router DOM (Navigation)
+- Framer Motion (Animations)
 
-## Getting Started
+**Backend & Services:**
+- Supabase (Database, Authentication, Edge Functions)
+- Twilio API (WhatsApp Messaging)
+- PostgreSQL (Database)
+
+**Development Tools:**
+- ESLint (Code Quality)
+- TypeScript (Type Safety)
+- Bun (Package Manager)
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ and npm (or Bun)
-- Git
+Before running QuantumTrack, ensure you have:
+- Node.js (v18 or higher)
+- Bun package manager
+- A Supabase account
+- A Twilio account (for WhatsApp functionality)
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone <your-repository-url>
-cd quantumhealth
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/QuantumClimb/quantumtrack.git
+   cd quantumtrack
+   ```
+
+2. **Install dependencies**
+   ```bash
+   bun install
+   ```
+
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in your Twilio credentials and Supabase configuration.
+
+4. **Database Setup**
+   Set up your Supabase project with the required tables and RLS policies.
+
+5. **Start Development Server**
+   ```bash
+   bun run dev
+   ```
+
+The application will be available at `http://localhost:8080`
+
+## 📊 Supabase Configuration
+
+### Database Schema
+
+QuantumTrack requires the following Supabase setup:
+
+#### Tables
+1. **customers** - Customer information and credit balances
+2. **transactions** - Purchase and payment records
+3. **reminders** - WhatsApp reminder logs
+
+#### Row Level Security (RLS)
+Implement proper RLS policies for multi-tenant data isolation.
+
+#### Edge Functions
+Deploy the `/send-reminder` Edge Function for WhatsApp integration:
+
+```javascript
+// Edge Function handles:
+- Customer name validation
+- Amount due formatting
+- Phone number verification
+- Apartment number parsing
+- Twilio API integration
 ```
 
-2. Install dependencies:
-```bash
-npm install
-# or if using Bun
-bun install
-```
+## 🏢 Apartment Number System
 
-3. Start the development server:
-```bash
-npm run dev
-# or
-bun dev
-```
+QuantumTrack uses an intelligent 5-digit apartment numbering system:
 
-4. Open your browser and navigate to `http://localhost:8080`
+- **Format**: `TTFFU`
+- **T**: Tower Number (2 digits)
+- **F**: Floor Number (2 digits)
+- **U**: Unit Number (1 digit)
 
-## Available Scripts
+**Examples:**
+- `36194` → Tower 36, Floor 19, Unit 4
+- `42012` → Tower 42, Floor 01, Unit 2
+- `15031` → Tower 15, Floor 03, Unit 1
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run build:dev` - Build for development environment
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint code analysis
+This system enables:
+- Easy customer identification
+- Efficient filtering and sorting
+- Automated location parsing
+- Delivery route optimization
 
-## Project Structure
+## 📱 Mobile-First Design
 
-```
-src/
-├── components/          # Reusable UI components
-│   ├── ui/             # shadcn-ui components
-│   ├── messages/       # Message system components
-│   └── reports/        # Report management components
-├── pages/              # Page components and routing
-├── hooks/              # Custom React hooks
-├── services/           # API and business logic
-├── mock/               # Development mock data
-└── lib/                # Utility functions
-```
+QuantumTrack is built with a mobile-first approach:
+- **Touch-optimized interfaces**
+- **Responsive layouts**
+- **Gesture support**
+- **Offline functionality**
+- **Progressive Web App (PWA) features**
 
-## User Roles
+## 🔮 Roadmap & Future Enhancements
 
-### For Patients
-- View and upload medical reports
-- Secure messaging with healthcare providers
-- Book and manage appointments
-- Personal health dashboard
+### Phase 2 Features
+- **Home Delivery Tracking**: Package and delivery management
+- **Water Delivery Status**: Specialized tracking for water services
+- **Advanced Filtering**: Filter by Tower, Floor, Building zones
+- **PDF Statements**: Automated customer statement generation
+- **Multi-language Support**: Internationalization capabilities
 
-### For Doctors
-- Review patient reports and communications
-- Manage patient interactions
-- Access comprehensive patient information
-- Administrative tools and settings
+### Phase 3 Features
+- **Analytics Dashboard**: Advanced business intelligence
+- **Mobile App**: Native iOS and Android applications
+- **API Integration**: Third-party service connections
+- **Automated Billing**: Recurring payment processing
 
-## Contributing
+## 🤝 Contributing
 
+We welcome contributions to QuantumTrack! Please read our contributing guidelines and submit pull requests for any improvements.
+
+### Development Workflow
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-## License
+## 📄 License
 
-This project is proprietary and confidential. All rights reserved.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🆘 Support
 
-For support, please contact the QuantumHealth development team.
+For support, questions, or feature requests:
+- Create an issue on GitHub
+- Contact: support@quantumclimb.com
+- Documentation: [QuantumTrack Docs](https://docs.quantumtrack.app)
+
+## 🙏 Acknowledgments
+
+Built with ❤️ by the QuantumClimb team for the building store management community.
 
 ---
 
-**QuantumHealth** - Your trusted healthcare companion for a healthier tomorrow.
+**QuantumTrack** - *Elevating Credit Management to the Next Level*

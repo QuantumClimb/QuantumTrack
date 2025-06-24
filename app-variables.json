@@ -1,0 +1,503 @@
+{
+  "app_info": {
+    "name": "QuantumTrack",
+    "version": "1.0.0",
+    "description": "Advanced Credit Line Management System"
+  },
+  "environment_variables": {
+    "client_side": {
+      "VITE_SUPABASE_URL": {
+        "type": "string",
+        "description": "Public Supabase URL accessible in frontend",
+        "required": true,
+        "example": "https://your-project.supabase.co"
+      },
+      "VITE_SUPABASE_ANON_KEY": {
+        "type": "string",
+        "description": "Supabase anonymous public key",
+        "required": true,
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      }
+    },
+    "server_side": {
+      "SUPABASE_URL": {
+        "type": "string",
+        "description": "Server-side Supabase URL",
+        "required": true,
+        "example": "https://your-project.supabase.co"
+      },
+      "SUPABASE_SERVICE_ROLE_KEY": {
+        "type": "string",
+        "description": "Supabase service role key for admin operations",
+        "required": true,
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      },
+      "SUPABASE_JWT_SECRET": {
+        "type": "string",
+        "description": "JWT secret for token validation",
+        "required": true,
+        "example": "your-jwt-secret"
+      }
+    }
+  },
+  "storage_keys": {
+    "localStorage": {
+      "STORAGE_KEY_CUSTOMERS": {
+        "value": "credit_line_customers",
+        "type": "string",
+        "description": "Key for storing customer data in localStorage"
+      },
+      "STORAGE_KEY_TRANSACTIONS": {
+        "value": "credit_line_transactions",
+        "type": "string",
+        "description": "Key for storing transaction data in localStorage"
+      },
+      "STORAGE_KEY_APARTMENT_RECORDS": {
+        "value": "credit_line_apartment_records",
+        "type": "string",
+        "description": "Key for storing apartment records in localStorage"
+      },
+      "theme": {
+        "value": "theme",
+        "type": "string",
+        "description": "Key for storing theme preference (light/dark)"
+      },
+      "isAutomaticTheme": {
+        "value": "isAutomaticTheme",
+        "type": "string",
+        "description": "Key for storing automatic theme switching preference"
+      }
+    }
+  },
+  "api_endpoints": {
+    "internal": {
+      "getCustomers": {
+        "description": "Retrieve all customers",
+        "returns": "Promise<Customer[]>"
+      },
+      "getCustomerById": {
+        "description": "Retrieve customer by ID",
+        "parameters": ["id: string"],
+        "returns": "Promise<Customer | null>"
+      },
+      "addCustomer": {
+        "description": "Add new customer",
+        "parameters": ["customerData: CustomerFormData"],
+        "returns": "Promise<Customer>"
+      },
+      "updateCustomer": {
+        "description": "Update existing customer",
+        "parameters": ["id: string", "customerData: CustomerFormData"],
+        "returns": "Promise<Customer | null>"
+      },
+      "deleteCustomer": {
+        "description": "Delete customer",
+        "parameters": ["id: string"],
+        "returns": "Promise<boolean>"
+      },
+      "getAllTransactions": {
+        "description": "Retrieve all transactions",
+        "returns": "Promise<Transaction[]>"
+      },
+      "getTransactionsByCustomerId": {
+        "description": "Retrieve transactions by customer ID",
+        "parameters": ["customerId: string"],
+        "returns": "Promise<Transaction[]>"
+      },
+      "addTransaction": {
+        "description": "Add new transaction",
+        "parameters": ["transactionData: TransactionFormData"],
+        "returns": "Promise<Transaction>"
+      },
+      "sendReminder": {
+        "description": "Send WhatsApp reminder",
+        "parameters": ["reminderData: ReminderData"],
+        "returns": "Promise<boolean>"
+      },
+      "getApartmentRecords": {
+        "description": "Retrieve apartment records",
+        "returns": "Promise<ApartmentRecord[]>"
+      },
+      "addApartmentRecord": {
+        "description": "Add apartment record",
+        "parameters": ["apartment: string", "amount: string"],
+        "returns": "Promise<ApartmentRecord>"
+      },
+      "updateApartmentRecord": {
+        "description": "Update apartment record",
+        "parameters": ["{ id: string; data: Partial<ApartmentRecord> }"],
+        "returns": "Promise<ApartmentRecord>"
+      },
+      "deleteApartmentRecord": {
+        "description": "Delete apartment record",
+        "parameters": ["id: string"],
+        "returns": "Promise<boolean>"
+      }
+    }
+  },
+  "component_state_variables": {
+    "Dashboard": {
+      "displayValue": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "Current display value for number input"
+      },
+      "entryMode": {
+        "type": "\"apartment\" | \"amount\"",
+        "default": "\"apartment\"",
+        "description": "Current entry mode (apartment or amount)"
+      },
+      "apartment": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "Current apartment number being entered"
+      },
+      "activeTab": {
+        "type": "string",
+        "default": "\"entry\"",
+        "description": "Currently active tab"
+      },
+      "refreshTrigger": {
+        "type": "number",
+        "default": "0",
+        "description": "Trigger for refreshing records"
+      },
+      "showConfirmModal": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Controls confirmation modal visibility"
+      },
+      "existingRecord": {
+        "type": "{ id: string; amount: number } | null",
+        "default": "null",
+        "description": "Existing record for update operations"
+      },
+      "records": {
+        "type": "ApartmentRecord[]",
+        "default": "[]",
+        "description": "Array of apartment records"
+      },
+      "apartmentBreakdown": {
+        "type": "{ tower: string; floor: string; unit: string } | null",
+        "default": "null",
+        "description": "Parsed apartment number breakdown"
+      }
+    },
+    "CustomerDetail": {
+      "customer": {
+        "type": "Customer | null",
+        "default": "null",
+        "description": "Current customer data"
+      },
+      "transactions": {
+        "type": "Transaction[]",
+        "default": "[]",
+        "description": "Customer's transaction history"
+      },
+      "loading": {
+        "type": "boolean",
+        "default": "true",
+        "description": "Loading state indicator"
+      },
+      "dialogType": {
+        "type": "\"purchase\" | \"payment\" | null",
+        "default": "null",
+        "description": "Type of dialog currently open"
+      },
+      "showReminderForm": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Controls reminder form visibility"
+      }
+    },
+    "TransactionForm": {
+      "amount": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "Transaction amount input"
+      },
+      "notes": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "Transaction notes input"
+      },
+      "isSubmitting": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Form submission state"
+      }
+    },
+    "Login": {
+      "username": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "Username input field"
+      },
+      "password": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "Password input field"
+      },
+      "pin": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "PIN input field"
+      },
+      "showKeypad": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Controls keypad visibility"
+      },
+      "forgotPinOpen": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Controls forgot PIN dialog"
+      },
+      "isLoading": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Login loading state"
+      }
+    },
+    "AddEditCustomer": {
+      "formData": {
+        "type": "CustomerFormData",
+        "description": "Customer form data object"
+      },
+      "loading": {
+        "type": "boolean",
+        "description": "Form loading state"
+      },
+      "submitting": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Form submission state"
+      },
+      "errors": {
+        "type": "Record<string, string>",
+        "default": "{}",
+        "description": "Form validation errors"
+      }
+    },
+    "WhatsAppSender": {
+      "activeTab": {
+        "type": "string",
+        "default": "\"text\"",
+        "description": "Active tab in WhatsApp sender"
+      },
+      "additionalMessage": {
+        "type": "string",
+        "default": "\"\"",
+        "description": "Additional message content"
+      },
+      "isSending": {
+        "type": "boolean",
+        "default": "false",
+        "description": "Sending state indicator"
+      },
+      "attachments": {
+        "type": "{type: string, name: string}[]",
+        "default": "[]",
+        "description": "Array of file attachments"
+      }
+    },
+    "ThemeProvider": {
+      "theme": {
+        "type": "Theme",
+        "description": "Current theme (light/dark)"
+      },
+      "isAutomatic": {
+        "type": "boolean",
+        "description": "Automatic theme switching enabled"
+      }
+    },
+    "Records": {
+      "searchTerm": {
+        "type": "string",
+        "default": "''",
+        "description": "Search term for filtering records"
+      }
+    },
+    "PaymentInput": {
+      "selectedRecord": {
+        "type": "string | null",
+        "default": "null",
+        "description": "Currently selected record ID"
+      }
+    }
+  },
+  "route_paths": {
+    "root": "/",
+    "dashboard": "/dashboard",
+    "records": "/records",
+    "reports": "/reports",
+    "settings": "/settings",
+    "payments": "/payments",
+    "customer_detail": "/customer/:id",
+    "add_customer": "/customer/add",
+    "edit_customer": "/customer/:id/edit"
+  },
+  "theme_variables": {
+    "themes": {
+      "light": "light",
+      "dark": "dark"
+    },
+    "auto_switch_hours": {
+      "dark_start": 19,
+      "dark_end": 7,
+      "description": "Dark theme active from 7 PM to 7 AM"
+    },
+    "check_interval": {
+      "value": 60000,
+      "description": "Theme check interval in milliseconds (1 minute)"
+    }
+  },
+  "currency_config": {
+    "locale": "en-IN",
+    "currency": "INR",
+    "symbol": "₹",
+    "minimumFractionDigits": 0
+  },
+  "apartment_number_system": {
+    "format": "TTFFU",
+    "tower_digits": 2,
+    "floor_digits": 2,
+    "unit_digits": 1,
+    "total_length": 5,
+    "examples": {
+      "36194": "Tower 36, Floor 19, Unit 4",
+      "42012": "Tower 42, Floor 01, Unit 2"
+    }
+  },
+  "status_configurations": {
+    "amount_due_status": {
+      "paid": {
+        "condition": "amount === 0",
+        "color": "status-paid",
+        "label": "Paid",
+        "icon": "CheckCircle",
+        "color_class": "text-green-400"
+      },
+      "overdue": {
+        "condition": "amount > 5000",
+        "color": "status-overdue",
+        "label": "Overdue",
+        "icon": "AlertTriangle",
+        "color_class": "text-red-400"
+      },
+      "due": {
+        "condition": "amount > 0 && amount <= 5000",
+        "color": "status-due",
+        "label": "Due",
+        "icon": "Clock",
+        "color_class": "text-yellow-400"
+      }
+    }
+  },
+  "form_field_names": {
+    "customer_form": {
+      "name": "name",
+      "apartment_number": "apartment_number",
+      "phone_number": "phone_number",
+      "amount_due": "amount_due"
+    },
+    "transaction_form": {
+      "customer_id": "customer_id",
+      "amount": "amount",
+      "type": "type",
+      "notes": "notes"
+    },
+    "login_form": {
+      "username": "username",
+      "password": "password",
+      "pin": "pin"
+    }
+  },
+  "transaction_types": {
+    "purchase": "purchase",
+    "payment": "payment"
+  },
+  "csv_export": {
+    "headers": ["Apartment Number", "Amount"],
+    "default_filename": "apartment_records.csv",
+    "mime_type": "text/csv;charset=utf-8;"
+  },
+  "time_formats": {
+    "date_locale": "en-IN",
+    "date_options": {
+      "year": "numeric",
+      "month": "short",
+      "day": "numeric"
+    },
+    "time_options": {
+      "hour": "2-digit",
+      "minute": "2-digit"
+    }
+  },
+  "phone_number_format": {
+    "country_code": "+91",
+    "length": 10,
+    "format_pattern": "+91 XXXXX XXXXX"
+  },
+  "mock_data_generators": {
+    "apartment_number": {
+      "tower_range": "01-99",
+      "floor_range": "01-99",
+      "unit_range": "0-9"
+    },
+    "phone_number": {
+      "prefix": "9",
+      "total_digits": 10
+    }
+  },
+  "ui_constants": {
+    "colors": {
+      "theme_color_light": "#14B8A6",
+      "theme_color_dark": "#0D9488",
+      "primary_color": "#14B8A6"
+    },
+    "fonts": {
+      "primary": "Josefin Sans",
+      "weights": ["300", "400", "500", "600", "700"]
+    }
+  },
+  "animation_constants": {
+    "toast_duration": {
+      "default": 4000,
+      "short": 3000,
+      "description": "Toast notification display duration in milliseconds"
+    },
+    "api_simulation_delay": 1000
+  },
+  "validation_rules": {
+    "amount": {
+      "min": 1,
+      "step": 1,
+      "required": true,
+      "type": "number"
+    },
+    "apartment_number": {
+      "length": 5,
+      "pattern": "TTFFU",
+      "required": true
+    },
+    "phone_number": {
+      "length": 10,
+      "pattern": "^[0-9]{10}$",
+      "required": true
+    }
+  },
+  "database_schema": {
+    "tables": {
+      "customers": {
+        "fields": ["id", "name", "apartment_number", "phone_number", "amount_due", "created_at", "updated_at"]
+      },
+      "transactions": {
+        "fields": ["id", "customer_id", "amount", "type", "notes", "created_at"]
+      },
+      "apartment_records": {
+        "fields": ["id", "apartment", "amount", "created_at", "status"]
+      }
+    }
+  }
+} 

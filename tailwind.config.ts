@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -8,17 +7,22 @@ export default {
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
+		"./index.html",
+		"./src/**/*.{js,ts,jsx,tsx}",
 	],
 	prefix: "",
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: '1.5rem',
 			screens: {
 				'2xl': '1400px'
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Josefin Sans', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -26,12 +30,14 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: "#F26A1B", // Vibrant orange
+					light: "#F29E6D", // Light orange
+					dark: "#BF522A", // Dark orange
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					DEFAULT: "#732D14", // Deep brown
+					light: "#8B371A", // Lighter brown
+					dark: "#5C240F", // Darker brown
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -42,8 +48,9 @@ export default {
 					foreground: 'hsl(var(--muted-foreground))'
 				},
 				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
+					DEFAULT: "#F2F2F2", // Light gray
+					light: "#FFFFFF", // White
+					dark: "#E5E5E5", // Darker gray
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -63,13 +70,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom HEALTHY app colors
-				healthy: {
+				// Custom colors for our app
+				teal: {
 					50: '#f0fdfa',
 					100: '#ccfbf1',
 					200: '#99f6e4',
 					300: '#5eead4',
-					400: '#2dd4bf', // Main teal accent
+					400: '#2dd4bf',
 					500: '#14b8a6',
 					600: '#0d9488',
 					700: '#0f766e',
@@ -77,18 +84,28 @@ export default {
 					900: '#134e4a',
 					950: '#042f2e',
 				},
-				nature: {
-					50: '#f0fdf4',
-					100: '#dcfce7',
-					200: '#bbf7d0',
-					300: '#86efac',
-					400: '#4ade80', // Main green accent
-					500: '#22c55e',
-					600: '#16a34a',
-					700: '#15803d',
-					800: '#166534',
-					900: '#14532d',
-					950: '#052e16',
+				orange: {
+					50: '#fff7ed',
+					100: '#ffedd5',
+					200: '#fed7aa',
+					300: '#fdba74',
+					400: '#fb923c',
+					500: '#f97316',
+					600: '#ea580c',
+					700: '#c2410c',
+					800: '#9a3412',
+					900: '#7c2d12',
+					950: '#431407',
+				},
+				neutral: {
+					DEFAULT: "#732D14", // Deep brown
+					light: "#BF522A", // Medium brown
+					dark: "#591F0D", // Very dark brown
+				},
+				danger: {
+					DEFAULT: "#F26A1B", // Vibrant orange
+					light: "#F29E6D", // Light orange
+					dark: "#BF522A", // Dark orange
 				},
 			},
 			borderRadius: {
@@ -97,44 +114,62 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
-				"accordion-down": {
-					from: { height: '0' },
-					to: { height: 'var(--radix-accordion-content-height)' },
-				},
-				"accordion-up": {
-					from: { height: 'var(--radix-accordion-content-height)' },
-					to: { height: '0' },
-				},
-				"fade-in": {
-					"0%": {
-						opacity: "0",
-						transform: "translateY(10px)"
+				'accordion-down': {
+					from: {
+						height: '0'
 					},
-					"100%": {
-						opacity: "1",
-						transform: "translateY(0)"
+					to: {
+						height: 'var(--radix-accordion-content-height)'
 					}
 				},
-				"scale-in": {
-					"0%": {
-						transform: "scale(0.95)",
-						opacity: "0"
+				'accordion-up': {
+					from: {
+						height: 'var(--radix-accordion-content-height)'
 					},
-					"100%": {
-						transform: "scale(1)",
-						opacity: "1"
+					to: {
+						height: '0'
 					}
 				},
+				fadeIn: {
+					from: { opacity: '0' },
+					to: { opacity: '1' }
+				},
+				slideUp: {
+					from: { transform: 'translateY(16px)', opacity: '0' },
+					to: { transform: 'translateY(0)', opacity: '1' }
+				},
+				slideInRight: {
+					from: { transform: 'translateX(16px)', opacity: '0' },
+					to: { transform: 'translateX(0)', opacity: '1' }
+				},
+				scaleIn: {
+					from: { transform: 'scale(0.95)', opacity: '0' },
+					to: { transform: 'scale(1)', opacity: '1' }
+				},
+				pulse: {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.5'
+					}
+				}
 			},
 			animation: {
-				"accordion-down": "accordion-down 0.2s ease-out",
-				"accordion-up": "accordion-up 0.2s ease-out",
-				"fade-in": "fade-in 0.3s ease-out",
-				"scale-in": "scale-in 0.2s ease-out",
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fadeIn 0.3s ease-out forwards',
+				'slide-up': 'slideUp 0.3s ease-out forwards',
+				'slide-in-right': 'slideInRight 0.3s ease-out forwards',
+				'scale-in': 'scaleIn 0.2s ease-out forwards',
+				'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			},
-			fontFamily: {
-				sans: ["Inter", "sans-serif"],
-			},
+			spacing: {
+				'safe-top': 'env(safe-area-inset-top)',
+				'safe-bottom': 'env(safe-area-inset-bottom)',
+				'safe-left': 'env(safe-area-inset-left)',
+				'safe-right': 'env(safe-area-inset-right)',
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

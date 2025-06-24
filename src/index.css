@@ -1,5 +1,5 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,8 +7,8 @@
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 34 30% 96%;
+    --foreground: 20 14.3% 4.1%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -16,10 +16,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 174 72% 50%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 160 84% 39%;
+    --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -33,18 +33,31 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 174 72% 50%;
+    --ring: 221.2 83.2% 53.3%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
+  }
 
-    --sidebar-background: 0 0% 99%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 174 72% 50%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 174 72% 50%;
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -54,32 +67,211 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-accent-light dark:bg-neutral-dark text-neutral-dark dark:text-accent-light;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    /* Fix for mobile viewport height issues */
+    min-height: -webkit-fill-available;
+  }
+
+  html {
+    height: -webkit-fill-available;
   }
 }
 
 @layer components {
-  .glass-card {
-    @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-md rounded-xl;
+  .card-shadow {
+    @apply shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/20 transition-shadow duration-200;
   }
   
-  .specialty-card {
-    @apply glass-card p-6 transition-all hover:shadow-lg cursor-pointer;
+  .container-padding {
+    @apply px-4 py-4;
+  }
+  
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 rounded transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary-dark text-neutral-dark font-semibold py-2 px-4 rounded transition-colors;
+  }
+  
+  .glassmorphism {
+    @apply bg-card/70 backdrop-blur-md border border-white/10 shadow-xl;
+  }
+  
+  .status-paid {
+    @apply text-green-400;
+  }
+  
+  .status-due {
+    @apply text-yellow-400;
+  }
+  
+  .status-overdue {
+    @apply text-red-400;
   }
 
-  .specialty-card-dentistry {
-    @apply border-l-4 border-l-healthy-400;
+  .search-container {
+    @apply relative glassmorphism rounded-xl overflow-hidden;
+  }
+  
+  /* Protected content styles */
+  .protected-content {
+    @apply bg-[#1A1F2C] p-3 rounded-lg border border-white/10;
+  }
+  
+  .protected-text {
+    @apply text-[#C8C8C9];
   }
 
-  .specialty-card-orthopaedics {
-    @apply border-l-4 border-l-nature-500;
+  /* Blue theme styles */
+  .blue-gradient {
+    @apply bg-gradient-to-b from-blue-400 to-blue-600;
   }
 
-  .specialty-card-cancer {
-    @apply border-l-4 border-l-amber-400;
+  .floating-button {
+    @apply fixed bottom-8 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-white shadow-lg
+    flex items-center justify-center text-blue-500 z-10;
+  }
+  
+  /* iOS-style transitions */
+  .fade-in {
+    @apply opacity-0 animate-[fadeIn_0.3s_ease-out_forwards];
   }
 
-  .specialty-card-lab {
-    @apply border-l-4 border-l-purple-400;
+  .slide-up {
+    @apply translate-y-4 opacity-0 animate-[slideUp_0.3s_ease-out_forwards];
   }
+
+  .slide-in-right {
+    @apply translate-x-4 opacity-0 animate-[slideInRight_0.3s_ease-out_forwards];
+  }
+
+  .scale-in {
+    @apply scale-95 opacity-0 animate-[scaleIn_0.2s_ease-out_forwards];
+  }
+
+  .touch-ripple {
+    @apply relative overflow-hidden;
+  }
+
+  .touch-ripple::after {
+    content: '';
+    @apply absolute block bg-white/20 w-full h-full top-0 left-0 opacity-0 pointer-events-none rounded-[inherit] transform scale-[5] transition-opacity duration-300;
+  }
+
+  .touch-ripple:active::after {
+    @apply opacity-100 transform scale-0 transition-transform duration-300;
+  }
+
+  .input-field {
+    @apply bg-white dark:bg-neutral border border-accent-dark dark:border-accent rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary;
+  }
+
+  .card {
+    @apply bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 border border-accent dark:border-accent-dark;
+  }
+
+  .nav-link {
+    @apply text-neutral-dark dark:text-accent hover:text-primary dark:hover:text-secondary transition-colors;
+  }
+
+  .header {
+    @apply bg-primary dark:bg-primary-dark text-white shadow-md;
+  }
+
+  .table-header {
+    @apply bg-primary text-white font-semibold;
+  }
+
+  .table-row {
+    @apply even:bg-accent-light odd:bg-white dark:even:bg-neutral dark:odd:bg-neutral-dark border-b border-accent dark:border-accent-dark;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  body {
+    font-size: 18px;
+  }
+  
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+  
+  h3 {
+    @apply text-lg;
+  }
+  
+  p {
+    @apply text-base;
+  }
+  
+  .container {
+    @apply px-4;
+  }
+}
+
+/* Framer Motion animations */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.2s ease-out;
 }
