@@ -50,7 +50,7 @@ const LaunchPage = () => {
       {/* Logo */}
       <div className="text-white mb-8 text-center">
         <img 
-          src={theme === 'dark' ? '/logo_blue.png' : '/logo_red.png'} 
+          src="/logo.png"
           alt="Credit Line Logo" 
           className="w-48 h-auto mb-4 mx-auto"
         />

@@ -20,7 +20,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center">
             <img 
-              src={theme === 'dark' ? '/logo_blue.png' : '/logo_red.png'} 
+              src="/logo.png"
               alt="Credit Line Logo" 
               className="h-8 w-auto mr-3"
             />
