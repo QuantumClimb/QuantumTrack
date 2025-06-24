@@ -12,11 +12,11 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ variant = 'dashboard', 
   const { theme } = useTheme();
 
   const menuItems = [
-    { icon: Plus, label: "New Entry", to: "/dashboard", ariaLabel: "Create new entry" },
-    { icon: CreditCard, label: "Payments", to: "/payments", ariaLabel: "Input payments" },
-    { icon: BarChart2, label: "Reports", to: "/reports", ariaLabel: "View reports" },
-    { icon: FileText, label: "Records", to: "/records", ariaLabel: "View records" },
-    { icon: Settings, label: "Settings", to: "/settings", ariaLabel: "Adjust settings" },
+    { icon: Plus, label: "New Entry", to: "/dashboard", ariaLabel: "Create new entry", preload: "dashboard" },
+    { icon: CreditCard, label: "Payments", to: "/payments", ariaLabel: "Input payments", preload: "payments" },
+    { icon: BarChart2, label: "Reports", to: "/reports", ariaLabel: "View reports", preload: "reports" },
+    { icon: FileText, label: "Records", to: "/records", ariaLabel: "View records", preload: "records" },
+    { icon: Settings, label: "Settings", to: "/settings", ariaLabel: "Adjust settings", preload: "settings" },
   ];
 
   // Filter out New Entry for launch variant
@@ -55,6 +55,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ variant = 'dashboard', 
             to={item.to}
             className="relative flex flex-col items-center group"
             aria-label={item.ariaLabel}
+            data-preload={item.preload}
           >
             <div className={itemClasses[variant]}>
               <item.icon className={iconClasses[variant]} />

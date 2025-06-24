@@ -7,6 +7,7 @@ import { getApartmentRecords } from "@/services/apiService";
 import { formatCurrency } from "@/utils/helpers";
 import NavigationMenu from "@/components/NavigationMenu";
 import { useTheme } from "@/components/ThemeProvider";
+import { preloadCriticalRoutes, addPreloadListeners } from "@/utils/routePreloader";
 
 const LaunchPage = () => {
   const { theme } = useTheme();
@@ -38,6 +39,12 @@ const LaunchPage = () => {
         console.error("Error loading latest record:", error);
       }
     };
+
+    // Preload critical routes for better performance
+    preloadCriticalRoutes();
+    
+    // Add preload listeners for navigation
+    addPreloadListeners();
     
     showLatestRecord();
   }, []);
@@ -62,6 +69,7 @@ const LaunchPage = () => {
         to="/dashboard"
         className="relative flex flex-col items-center group mb-8"
         aria-label="Create new entry"
+        data-preload="dashboard"
       >
         <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white 
                   shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 
