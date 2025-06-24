@@ -153,4 +153,3 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ records }) => {
 };
 
 export default ResponsiveTable; 
-export default ResponsiveTable; 
